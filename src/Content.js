@@ -3,9 +3,8 @@ import { Box, Typography } from "@mui/material"
 import ContentSnackbar from "./components/ContentSnackbar"
 import { onMessage } from "./service/mockServer"
 
-export default function Content() {
+export default function Content({ open, setOpen }) {
   // Snackbar
-  const [open, setOpen] = useState(false)
   const lastSubmission = useRef({})
 
   const handleSnackbarClose = () => setOpen(false)
@@ -14,15 +13,15 @@ export default function Content() {
   // Receiving Submission message
   useEffect(() => {
     onMessage(handleSubmissionMessage)
-    
+
     return () => {
       setOpen(false)
     }
   }, [])
 
   const handleSubmissionMessage = (submissionMessage) => {
-    if (!submissionMessage?.id) return 
-    
+    if (!submissionMessage?.id) return
+
     console.log(submissionMessage)
     lastSubmission.current = { ...submissionMessage }
     setOpen(true)

@@ -1,5 +1,4 @@
-import Button from "@mui/material/Button"
-import IconButton from "@mui/material/IconButton"
+import { Button, IconButton} from "@mui/material"
 import CloseIcon from "@mui/icons-material/Close"
 
 const ContentSnackbarAction = ({ handleSnackbarClose, handleSnackbarLike }) => {

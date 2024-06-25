@@ -12,7 +12,6 @@ const ContentSnackbar = ({
     <Snackbar
       open={open}
       onClose={handleSnackbarClose}
-      autoHideDuration={3000}
       anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
     >
       <SnackbarContent
