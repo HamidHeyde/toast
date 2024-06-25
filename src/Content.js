@@ -1,15 +1,34 @@
-import React from 'react';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
+import { useState, useRef } from "react"
+import { Box, Typography } from "@mui/material"
+import ContentSnackbar from "./components/ContentSnackbar"
 
 export default function Content() {
-  return (
-    <Box sx={{marginTop: 3}}>
-      <Typography variant="h4">Liked Form Submissions</Typography>
+  const [open, setOpen] = useState(true)
+  const lastSubmission = useRef({
+    id: '123-1243-1234',
+    data: {
+      firstName: "some firstName",
+      lastName: "some lastName",
+      email: "someone@gmail.com",
+      liked: false
+    }
+  })
 
-      <Typography variant="body1" sx={{fontStyle: 'italic', marginTop: 1}}>
-        TODO: List of liked submissions here (delete this line)
-      </Typography>
+   const handleSnackbarClose = () => setOpen(false)
+   const handleSnackbarLike = () => setOpen(false)
+
+
+  return (
+    <Box sx={{ marginTop: 3 }}>
+      <Typography variant="h4">Liked Form Submissions</Typography>
+      {/* table for submissions display */}
+      {/* snackbar */}
+      <ContentSnackbar
+        open={open}
+        lastSubmission={lastSubmission.current}
+        handleSnackbarClose={handleSnackbarClose}
+        handleSnackbarLike={handleSnackbarLike}
+      />
     </Box>
-  );
+  )
 }
