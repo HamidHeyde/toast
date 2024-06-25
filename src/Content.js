@@ -1,22 +1,32 @@
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Box, Typography } from "@mui/material"
 import ContentSnackbar from "./components/ContentSnackbar"
+import { onMessage } from "./service/mockServer"
 
 export default function Content() {
-  const [open, setOpen] = useState(true)
-  const lastSubmission = useRef({
-    id: '123-1243-1234',
-    data: {
-      firstName: "some firstName",
-      lastName: "some lastName",
-      email: "someone@gmail.com",
-      liked: false
+  // Snackbar
+  const [open, setOpen] = useState(false)
+  const lastSubmission = useRef({})
+
+  const handleSnackbarClose = () => setOpen(false)
+  const handleSnackbarLike = () => setOpen(false)
+
+  // Receiving Submission message
+  useEffect(() => {
+    onMessage(handleSubmissionMessage)
+    
+    return () => {
+      setOpen(false)
     }
-  })
+  }, [])
 
-   const handleSnackbarClose = () => setOpen(false)
-   const handleSnackbarLike = () => setOpen(false)
-
+  const handleSubmissionMessage = (submissionMessage) => {
+    if (!submissionMessage?.id) return 
+    
+    console.log(submissionMessage)
+    lastSubmission.current = { ...submissionMessage }
+    setOpen(true)
+  }
 
   return (
     <Box sx={{ marginTop: 3 }}>

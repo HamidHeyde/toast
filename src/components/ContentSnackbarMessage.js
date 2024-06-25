@@ -2,12 +2,11 @@ import { makeStyles } from "@material-ui/core/styles"
 
 const ContentSnackbarMessage = ({ data }) => {
   const classes = useStyles()
-  const { firstName, lastName, email } = data
 
   return (
     <div className={classes.wrapper}>
-      <div>{`${firstName} ${lastName}`}</div>
-      <div>{email}</div>
+      <div>{`${data?.firstName || "firstName"} ${data?.lastName || "lastName"}`}</div>
+      <div>{data?.email || "someEmail@mail.com"}</div>
     </div>
   )
 }
