@@ -1,3 +1,5 @@
+Please check this [Notes](./HamidNotes.md)
+
 # Toast Exercise
 
 Welcome to the toast exercise! We just got a new project from the Product team to implement
