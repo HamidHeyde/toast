@@ -1,20 +1,56 @@
+import {
+  onMessage,
+  saveLikedFormSubmission,
+  fetchLikedFormSubmissions,
+} from "./service/mockServer"
 import { useState, useRef, useEffect } from "react"
 import { Box, Typography, CircularProgress } from "@mui/material"
 import ContentSnackbar from "./components/ContentSnackbar"
 import SubmissionTable from "./components/SubmissionTable"
 import ErrorPanel from "./components/ErrorPanel"
-import { onMessage, saveLikedFormSubmission } from "./service/mockServer"
 import { makeStyles } from "@material-ui/core/styles"
 
 const Content = ({ open, setOpen }) => {
+  // styles
   const classes = useStyles()
+  /**
+   * States
+   *  - for loading, error
+   *  - for single submission received and liked submissions
+   */
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const lastSubmission = useRef({})
+  const [likedSubmissions, setLikedSubmissions] = useState([])
 
+  /**
+   * useEffect for
+   *  - submitting the function to onMessage
+   *  - fetching liked submissions onLoad
+   */
+  useEffect(() => {
+    // Submit the function
+    onMessage(handleSubmissionMessage)
+    // Fetch liked submissions
+    handleFetchLikedSubmissions()
+
+    return () => {
+      setOpen(false)
+    }
+  }, [])
+
+  // Handled the snackbar closing
   const handleSnackbarClose = () => {
     setOpen(false)
     setError(null)
+  }
+
+  // submission function for onMessage
+  const handleSubmissionMessage = (submissionMessage) => {
+    if (!submissionMessage?.id) return
+
+    lastSubmission.current = { ...submissionMessage }
+    setOpen(true)
   }
 
   // Handles snackbar like button
@@ -22,6 +58,7 @@ const Content = ({ open, setOpen }) => {
     setLoading(true)
     try {
       await saveLikedFormSubmission(lastSubmission.current)
+      setLikedSubmissions([...likedSubmissions, { ...lastSubmission.current }])
       setOpen(false)
       setLoading(false)
       setError(null)
@@ -31,21 +68,18 @@ const Content = ({ open, setOpen }) => {
     }
   }
 
-  // Receiving Submission message
-  useEffect(() => {
-    // Submit the function
-    onMessage(handleSubmissionMessage)
-
-    return () => {
-      setOpen(false)
+  // handles fetching liked submissions
+  const handleFetchLikedSubmissions = async () => {
+    setLoading(true)
+    try {
+      const { formSubmissions } = await fetchLikedFormSubmissions()
+      setLikedSubmissions([...formSubmissions])
+      setLoading(false)
+      setError(null)
+    } catch (e) {
+      setLoading(false)
+      setError("SubmissionFetchingError")
     }
-  }, [])
-
-  const handleSubmissionMessage = (submissionMessage) => {
-    if (!submissionMessage?.id) return
-
-    lastSubmission.current = { ...submissionMessage }
-    setOpen(true)
   }
 
   return (
@@ -57,7 +91,7 @@ const Content = ({ open, setOpen }) => {
           <CircularProgress />
         ) : (
           <>
-            {!error && <SubmissionTable />}
+            {!error && <SubmissionTable likedSubmissions={likedSubmissions} />}
             {error && <ErrorPanel error={error} />}
           </>
         )}
