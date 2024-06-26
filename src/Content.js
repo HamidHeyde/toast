@@ -1,17 +1,39 @@
 import { useState, useRef, useEffect } from "react"
-import { Box, Typography } from "@mui/material"
+import { Box, Typography, CircularProgress } from "@mui/material"
 import ContentSnackbar from "./components/ContentSnackbar"
-import { onMessage } from "./service/mockServer"
+import SubmissionTable from "./components/SubmissionTable"
+import ErrorPanel from "./components/ErrorPanel"
+import { onMessage, saveLikedFormSubmission } from "./service/mockServer"
+import { makeStyles } from "@material-ui/core/styles"
 
-export default function Content({ open, setOpen }) {
-  // Snackbar
+const Content = ({ open, setOpen }) => {
+  const classes = useStyles()
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
   const lastSubmission = useRef({})
 
-  const handleSnackbarClose = () => setOpen(false)
-  const handleSnackbarLike = () => setOpen(false)
+  const handleSnackbarClose = () => {
+    setOpen(false)
+    setError(null)
+  }
+
+  // Handles snackbar like button
+  const handleSnackbarLike = async () => {
+    setLoading(true)
+    try {
+      await saveLikedFormSubmission(lastSubmission.current)
+      setOpen(false)
+      setLoading(false)
+      setError(null)
+    } catch (e) {
+      setLoading(false)
+      setError("SubmissionSavingError")
+    }
+  }
 
   // Receiving Submission message
   useEffect(() => {
+    // Submit the function
     onMessage(handleSubmissionMessage)
 
     return () => {
@@ -22,7 +44,6 @@ export default function Content({ open, setOpen }) {
   const handleSubmissionMessage = (submissionMessage) => {
     if (!submissionMessage?.id) return
 
-    console.log(submissionMessage)
     lastSubmission.current = { ...submissionMessage }
     setOpen(true)
   }
@@ -31,6 +52,16 @@ export default function Content({ open, setOpen }) {
     <Box sx={{ marginTop: 3 }}>
       <Typography variant="h4">Liked Form Submissions</Typography>
       {/* table for submissions display */}
+      <div className={classes.submissionWrapper}>
+        {loading ? (
+          <CircularProgress />
+        ) : (
+          <>
+            {!error && <SubmissionTable />}
+            {error && <ErrorPanel error={error} />}
+          </>
+        )}
+      </div>
       {/* snackbar */}
       <ContentSnackbar
         open={open}
@@ -41,3 +72,17 @@ export default function Content({ open, setOpen }) {
     </Box>
   )
 }
+
+export default Content
+
+const useStyles = makeStyles(() => ({
+  submissionWrapper: {
+    width: "100%",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    boxSizing: "border-box",
+    marginTop: "50px",
+  },
+}))
